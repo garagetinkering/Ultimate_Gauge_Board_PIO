@@ -10,18 +10,10 @@
 
 // IMAGES
 #include "images/tabby_needle.h"
-#include "images/tabby_needle_shadow.h"
 #include "images/tabby_tick.h"
-#include "images/tabby_tick_shadow.h"
 
 LV_IMG_DECLARE(tabby_needle);
-LV_IMG_DECLARE(tabby_needle_shadow);
 LV_IMG_DECLARE(tabby_tick);
-LV_IMG_DECLARE(tabby_tick_shadow);
-
-// FONTS
-#include "fonts/code_sb_100.h"
-#include "fonts/code_r_30.h"
 
 // DATA STORE
 typedef struct struct_gauge_data {
@@ -37,21 +29,23 @@ const int SCALE_MIN           = -20;
 const int SCALE_MAX           = 140;
 const int SCALE_TICKS_COUNT   = 9;
 
+const bool TESTING            = false; // set to true for needle sweep testing
+
 // CONTROL VARIABLE INIT
 bool initial_load             = false; // has the first data been received
 volatile bool data_ready      = false; // new incoming data
 bool init_anim_complete       = false; // needle sweep completed
+bool status_led               = false; // flashing LED for CAN activity
 
+// ROLLING AVERAGE FOR SMOOTHING
 uint8_t average_coolant_temp  = 0;
 
 // GLOBAL COMPONENTS
 lv_obj_t *main_scr;
 lv_obj_t *scale;
 lv_obj_t *needle_img;
-lv_obj_t *needle_img_shadow;
 
 lv_obj_t *scale_ticks[SCALE_TICKS_COUNT];
-lv_obj_t* scale_tick_shadow[SCALE_TICKS_COUNT];
 
 void Drivers_Init(void) {
   I2C_Init();
@@ -103,7 +97,6 @@ void Update_Coolant_Temp(void) {
   // use a moving average of the last x values for smoothing
   average_coolant_temp = Get_Moving_Average(GaugeData.coolant_temp);
   if (init_anim_complete) {
-    //lv_scale_set_image_needle_value(scale, needle_img_shadow, average_coolant_temp);
     lv_scale_set_image_needle_value(scale, needle_img, average_coolant_temp);
   }
 }
@@ -115,7 +108,6 @@ void Update_Values(void) {
 
 // update the UI with the latest value
 static void Set_Needle_Img_Value(void * obj, int32_t v) {
-  //lv_scale_set_image_needle_value(scale, needle_img_shadow, v);  
   lv_scale_set_image_needle_value(scale, needle_img, v);
 }
 
@@ -139,38 +131,33 @@ void Needle_To_Current(lv_anim_t *a) {
 
 // 0 to max to 0 sweep on load
 void Needle_Sweep() {
-  lv_anim_t anim_scale_img;
-  lv_anim_init(&anim_scale_img);
-  lv_anim_set_var(&anim_scale_img, scale);
-  lv_anim_set_exec_cb(&anim_scale_img, Set_Needle_Img_Value);
-  lv_anim_set_duration(&anim_scale_img, 2000);
-  lv_anim_set_repeat_count(&anim_scale_img, 1);
-  lv_anim_set_playback_duration(&anim_scale_img, 1000);
-  lv_anim_set_values(&anim_scale_img, SCALE_MIN, SCALE_MAX);
-  lv_anim_set_ready_cb(&anim_scale_img, Needle_To_Current);
-  lv_anim_start(&anim_scale_img);
-
-    // back and forth sweep
-    // lv_anim_t anim_scale_img;
-    // lv_anim_init(&anim_scale_img);
-    // lv_anim_set_var(&anim_scale_img, scale);
-    // lv_anim_set_exec_cb(&anim_scale_img, Set_Needle_Img_Value);
-    // lv_anim_set_duration(&anim_scale_img, 10000);
-    // lv_anim_set_repeat_count(&anim_scale_img, LV_ANIM_REPEAT_INFINITE);
-    // lv_anim_set_playback_duration(&anim_scale_img, 10000);
-    // lv_anim_set_values(&anim_scale_img, -20, 140);
-    // lv_anim_start(&anim_scale_img);
+  if (TESTING) {
+    // back and forth sweep for testing
+    lv_anim_t anim_scale_img;
+    lv_anim_init(&anim_scale_img);
+    lv_anim_set_var(&anim_scale_img, scale);
+    lv_anim_set_exec_cb(&anim_scale_img, Set_Needle_Img_Value);
+    lv_anim_set_duration(&anim_scale_img, 10000);
+    lv_anim_set_repeat_count(&anim_scale_img, LV_ANIM_REPEAT_INFINITE);
+    lv_anim_set_playback_duration(&anim_scale_img, 10000);
+    lv_anim_set_values(&anim_scale_img, -20, 140);
+    lv_anim_start(&anim_scale_img);
+  } else {
+    lv_anim_t anim_scale_img;
+    lv_anim_init(&anim_scale_img);
+    lv_anim_set_var(&anim_scale_img, scale);
+    lv_anim_set_exec_cb(&anim_scale_img, Set_Needle_Img_Value);
+    lv_anim_set_duration(&anim_scale_img, 2000);
+    lv_anim_set_repeat_count(&anim_scale_img, 1);
+    lv_anim_set_playback_duration(&anim_scale_img, 1000);
+    lv_anim_set_values(&anim_scale_img, SCALE_MIN, SCALE_MAX);
+    lv_anim_set_ready_cb(&anim_scale_img, Needle_To_Current);
+    lv_anim_start(&anim_scale_img);
+  }    
 }
 
 void Make_Scale_Ticks(void) {
   for (int i = 0; i < SCALE_TICKS_COUNT; i++) {
-        // unnecessary shadow whilst using black background
-      
-        // scale_tick_shadow[i] = lv_image_create(main_scr);
-        // lv_image_set_src(scale_tick_shadow[i], &tabby_tick_shadow);
-        // lv_obj_align(scale_tick_shadow[i], LV_ALIGN_CENTER, 0, 200);
-        // lv_image_set_pivot(scale_tick_shadow[i], 12, -188);
-
         scale_ticks[i] = lv_image_create(main_scr);
         lv_image_set_src(scale_ticks[i], &tabby_tick);
         lv_obj_align(scale_ticks[i], LV_ALIGN_CENTER, 0, 200);
@@ -181,19 +168,12 @@ void Make_Scale_Ticks(void) {
 
         int rotation_angle = (((i) * (240 / (SCALE_TICKS_COUNT - 1))) * 10); // angle calculation
 
-        //lv_image_set_rotation(scale_tick_shadow[i], rotation_angle);
         lv_image_set_rotation(scale_ticks[i], rotation_angle);
     }
 }
 
 // create the elements on the main scr
 void Main_Scr_UI(void) {
-   
-    // display image background
-    // lv_obj_t* img = lv_img_create(main_scr);
-    // lv_img_set_src(img, &tabby_paw_480);
-    // lv_obj_center(img);
-
     // scale used for needle
     scale = lv_scale_create(main_scr);
     lv_obj_set_size(scale, 480, 480);
@@ -229,13 +209,8 @@ void Main_Scr_UI(void) {
     
     Make_Scale_Ticks();
     
-    
     // needle image
     int needle_center_shift = 40; // how far the center of the needle is shifted from the left edge
-    // needle_img_shadow = lv_image_create(scale);
-    // lv_image_set_src(needle_img_shadow, &tabby_needle_shadow);
-    // lv_obj_align(needle_img_shadow, LV_ALIGN_CENTER, 108 - needle_center_shift, 0);
-    // lv_image_set_pivot(needle_img_shadow, needle_center_shift, 36);
    
     needle_img = lv_image_create(scale);
     lv_image_set_src(needle_img, &tabby_needle);
@@ -255,19 +230,20 @@ void Screens_Init(void) {
   Main_Scr_UI();
 }
 
+// process incoming CAN coolante temp message
 void Process_Coolant_Temp(uint8_t *byte_data) {
     // byte 0
-    // mod -40
+    // modifier -40
 
     int byte_pos = 0;
-    int final_temp = byte_data[byte_pos] - 40;
+    int final_temp = byte_data[byte_pos] - 40; // reduce value by 40 (Nissan specific)
 
     Serial.println(final_temp);
 
     GaugeData.coolant_temp = final_temp;
 }
-bool status_led = false;
 
+// task to avoid blocking LVGL with CAN receive
 void Receive_CAN_Task(void *arg) {
     while (1) {
       twai_message_t message;
@@ -283,6 +259,7 @@ void Receive_CAN_Task(void *arg) {
           }
           Serial.println();
 
+          // switch on the CAN ID
           switch (message.identifier) {
             case 0x551:
               Process_Coolant_Temp(message.data);
@@ -296,7 +273,10 @@ void Receive_CAN_Task(void *arg) {
       } else {
           ESP_LOGE(TAG, "Message reception failed: %s", esp_err_to_name(err));
       }
-          if (!status_led) {
+
+      // cyclic flash of status LED on CAN activity
+      // if activity stops it will flash at 1s intervals
+      if (!status_led) {
         Set_EXIO(EXIO_PIN4, High);
         status_led = true;
       } else {
@@ -311,7 +291,7 @@ void setup(void) {
   Serial.begin(115200);
   Serial.println("begin");
   Drivers_Init();
-  Set_Backlight(50);
+  Set_Backlight(100);
 
   Screens_Init();
   Needle_Sweep();
@@ -324,6 +304,7 @@ void setup(void) {
 void loop(void) {
   lv_timer_handler();
 
+  // only update the display if new data has arrived
   if (data_ready) {
     data_ready = false;
     Update_Values();
