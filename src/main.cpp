@@ -300,7 +300,7 @@ void setup(void) {
   Needle_Sweep();
   Set_EXIO(EXIO_PIN4, Low);
 
-  xTaskCreate(Receive_CAN_Task, "Receive_CAN_Task", 2048, NULL, 1, NULL);
+  xTaskCreate(Receive_CAN_Task, "Receive_CAN_Task", 8192, NULL, 1, NULL);
   Serial.print("setup complete");
 }
 
