@@ -7,6 +7,7 @@
 #include "LVGL_Driver.h"
 #include "I2C_Driver.h"
 #include <vector>
+#include "esp_task_wdt.h"
 
 // IMAGES
 #include "images/tabby_needle.h"
@@ -245,46 +246,48 @@ void Process_Coolant_Temp(uint8_t *byte_data) {
 
 // task to avoid blocking LVGL with CAN receive
 void Receive_CAN_Task(void *arg) {
-    while (1) {
-      twai_message_t message;
-      esp_err_t err = twai_receive(&message, pdMS_TO_TICKS(1000));
-      if (err == ESP_OK) {
-          Serial.print("Received CAN message: ID=0x");
-          Serial.print(message.identifier, HEX);
-          Serial.print(" DLC=");
-          Serial.print(message.data_length_code);
-          Serial.print(" Data=");
-          for (int i = 0; i < message.data_length_code; i++) {
-            Serial.printf("%02X ", message.data[i]);
-          }
-          Serial.println();
+  // Register this task with the watchdog
+  esp_task_wdt_add(NULL);
 
-          // switch on the CAN ID
-          switch (message.identifier) {
-            case 0x551:
-              Process_Coolant_Temp(message.data);
-              data_ready = true;
-              break;
-            default:
-              break;
-          }
-      } else if (err == ESP_ERR_TIMEOUT) {
-          ESP_LOGW(TAG, "Reception timed out");
-      } else {
-          ESP_LOGE(TAG, "Message reception failed: %s", esp_err_to_name(err));
-      }
+  while (1) {
+    twai_message_t message;
+    // Use shorter wait time so we can periodically reset WDT
+    esp_err_t err = twai_receive(&message, pdMS_TO_TICKS(100));
 
-      // cyclic flash of status LED on CAN activity
-      // if activity stops it will flash at 1s intervals
-      if (!status_led) {
+    if (err == ESP_OK) {
+      
+        Serial.print("Received CAN message: ID=0x");
+        Serial.print(message.identifier, HEX);
+        Serial.print(" DLC=");
+        Serial.print(message.data_length_code);
+        Serial.print(" Data=");
+        for (int i = 0; i < message.data_length_code; i++) {
+          Serial.printf("%02X ", message.data[i]);
+        }
+        Serial.println();
+
+        // process CAN IDs
+        switch (message.identifier) {
+          case 0x551:
+            Process_Coolant_Temp(message.data);
+            data_ready = true;
+            break;
+          default:
+            break;
+        }
+
         Set_EXIO(EXIO_PIN4, High);
-        status_led = true;
-      } else {
-        Set_EXIO(EXIO_PIN4, Low);
-        status_led = false;
-      }
-      vTaskDelay(pdMS_TO_TICKS(1));
+    } else if (err == ESP_ERR_TIMEOUT) {
+        // No message within 100ms — that’s fine
+        ESP_LOGW(TAG, "Reception timed out");
+    } else {
+        ESP_LOGE(TAG, "Message reception failed: %s", esp_err_to_name(err));
     }
+
+    // Reset watchdog and yield
+    esp_task_wdt_reset();
+    vTaskDelay(pdMS_TO_TICKS(10)); // let scheduler breathe
+  }
 }
 
 void setup(void) {
@@ -310,5 +313,5 @@ void loop(void) {
     Update_Values();
   }
 
-  vTaskDelay(pdMS_TO_TICKS(5));
+  delay(5);
 }
