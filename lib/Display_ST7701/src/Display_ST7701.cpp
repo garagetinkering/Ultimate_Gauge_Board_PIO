@@ -3,7 +3,7 @@
       
 spi_device_handle_t SPI_handle = NULL;     
 esp_lcd_panel_handle_t panel_handle = NULL;            
-void ST7701_WriteCommand(uint8_t cmd) {
+void st7701_write_command(uint8_t cmd) {
   spi_transaction_t spi_tran = {
     .cmd = 0,
     .addr = cmd,
@@ -13,7 +13,7 @@ void ST7701_WriteCommand(uint8_t cmd) {
   spi_device_transmit(SPI_handle, &spi_tran);
 }
 
-void ST7701_WriteData(uint8_t data) {
+void st7701_write_data(uint8_t data) {
   spi_transaction_t spi_tran = {
     .cmd = 1,
     .addr = data,
@@ -23,26 +23,26 @@ void ST7701_WriteData(uint8_t data) {
   spi_device_transmit(SPI_handle, &spi_tran);
 }
 
-void ST7701_CS_EN(){
-  Set_EXIO(EXIO_PIN3, Low);
+void st7701_cs_en(){
+  set_exio(EXIO_PIN3, Low);
 
   vTaskDelay(pdMS_TO_TICKS(10));
 }
 
-void ST7701_CS_Dis(){
-  Set_EXIO(EXIO_PIN3, High);
+void st7701_cs_dis(){
+  set_exio(EXIO_PIN3, High);
 
   vTaskDelay(pdMS_TO_TICKS(10));
 }
 
-void ST7701_Reset(){
-  Set_EXIO(EXIO_PIN1, Low);
+void st7701_reset(){
+  set_exio(EXIO_PIN1, Low);
   vTaskDelay(pdMS_TO_TICKS(10));
-  Set_EXIO(EXIO_PIN1, High);
+  set_exio(EXIO_PIN1, High);
   vTaskDelay(pdMS_TO_TICKS(50));
 }
 
-void ST7701_Init() {
+void st7701_init() {
   spi_bus_config_t buscfg = {
     .mosi_io_num = LCD_MOSI_PIN,
     .miso_io_num = -1,
@@ -66,261 +66,262 @@ void ST7701_Init() {
   // gpio_reset_pin(LCD_CS_EX_PIN);
   // gpio_set_direction(LCD_CS_EX_PIN, GPIO_MODE_OUTPUT);
 
-  ST7701_CS_EN();
-  ST7701_WriteCommand(0xFF);
-  ST7701_WriteData(0x77);
-  ST7701_WriteData(0x01);
-  ST7701_WriteData(0x00);
-  ST7701_WriteData(0x00);
-  ST7701_WriteData(0x10);
+  st7701_cs_en();
+  st7701_write_command(0xFF);
+  st7701_write_data(0x77);
+  st7701_write_data(0x01);
+  st7701_write_data(0x00);
+  st7701_write_data(0x00);
+  st7701_write_data(0x10);
 
-  ST7701_WriteCommand(0xC0);
-  ST7701_WriteData(0x3B); //Scan line	
-  ST7701_WriteData(0x00);
+  st7701_write_command(0xC0);
+  st7701_write_data(0x3B); //Scan line	
+  st7701_write_data(0x00);
 
-  ST7701_WriteCommand(0xC1);
-  ST7701_WriteData(0x0B);	//VBP
-  ST7701_WriteData(0x02);
+  st7701_write_command(0xC1);
+  st7701_write_data(0x0B);	//VBP
+  st7701_write_data(0x02);
 
-  ST7701_WriteCommand(0xC2);
-  ST7701_WriteData(0x07);
-  ST7701_WriteData(0x02);
+  st7701_write_command(0xC2);
+  st7701_write_data(0x07);
+  st7701_write_data(0x02);
 
-  ST7701_WriteCommand(0xCC);
-  ST7701_WriteData(0x10);
+  st7701_write_command(0xCC);
+  st7701_write_data(0x10);
 
-  ST7701_WriteCommand(0xCD);  //RGB format
-  ST7701_WriteData(0x08);
+  st7701_write_command(0xCD);  //RGB format
+  st7701_write_data(0x08);
 
-  ST7701_WriteCommand(0xB0);  // IPS   
-  ST7701_WriteData(0x00);     // 255 
-  ST7701_WriteData(0x11);     // 251    
-  ST7701_WriteData(0x16);     // 247  down
-  ST7701_WriteData(0x0e);     // 239    
-  ST7701_WriteData(0x11);     // 231    
-  ST7701_WriteData(0x06);     // 203    
-  ST7701_WriteData(0x05);     // 175 
-  ST7701_WriteData(0x09);     // 147    
-  ST7701_WriteData(0x08);     // 108    
-  ST7701_WriteData(0x21);     // 80  
-  ST7701_WriteData(0x06);     // 52   
-  ST7701_WriteData(0x13);     // 24    
-  ST7701_WriteData(0x10);     // 16    
-  ST7701_WriteData(0x29);     // 8    down
-  ST7701_WriteData(0x31);     // 4    
-  ST7701_WriteData(0x18);     // 0   
+  st7701_write_command(0xB0);  // IPS   
+  st7701_write_data(0x00);     // 255 
+  st7701_write_data(0x11);     // 251    
+  st7701_write_data(0x16);     // 247  down
+  st7701_write_data(0x0e);     // 239    
+  st7701_write_data(0x11);     // 231    
+  st7701_write_data(0x06);     // 203    
+  st7701_write_data(0x05);     // 175 
+  st7701_write_data(0x09);     // 147    
+  st7701_write_data(0x08);     // 108    
+  st7701_write_data(0x21);     // 80  
+  st7701_write_data(0x06);     // 52   
 
-  ST7701_WriteCommand(0xB1);  //  IPS	   
-  ST7701_WriteData(0x00);     //  255 
-  ST7701_WriteData(0x11);     //  251
-  ST7701_WriteData(0x16);     //  247   down
-  ST7701_WriteData(0x0e);     //  239
-  ST7701_WriteData(0x11);     //  231
-  ST7701_WriteData(0x07);     //  203    
-  ST7701_WriteData(0x05);     //  175
-  ST7701_WriteData(0x09);     //  147  
-  ST7701_WriteData(0x09);     //  108  
-  ST7701_WriteData(0x21);     //  80 
-  ST7701_WriteData(0x05);     //  52   
-  ST7701_WriteData(0x13);     //  24 
-  ST7701_WriteData(0x11);     //  16 
-  ST7701_WriteData(0x2a);     //  8  down 
-  ST7701_WriteData(0x31);     //  4  
-  ST7701_WriteData(0x18);     //  0  
+  st7701_write_command(0xB1);  //  IPS     
+  st7701_write_data(0x00);     //  255 
+  st7701_write_data(0x11);     //  251
+  st7701_write_data(0x16);     //  247   down
+  st7701_write_data(0x0e);     //  239
+  st7701_write_data(0x11);     //  231
+  st7701_write_data(0x07);     //  203    
+  st7701_write_data(0x05);     //  175
+  st7701_write_data(0x09);     //  147  
+  st7701_write_data(0x09);     //  108  
+  st7701_write_data(0x21);     //  80 
+  st7701_write_data(0x05);     //  52   
+  st7701_write_data(0x13);     //  24 
+  st7701_write_data(0x11);     //  16 
+  st7701_write_data(0x2a);     //  8  down 
+  st7701_write_data(0x31);     //  4  
+  st7701_write_data(0x18);     //  0  
 
-  ST7701_WriteCommand(0xFF);
-  ST7701_WriteData(0x77);
-  ST7701_WriteData(0x01);
-  ST7701_WriteData(0x00);
-  ST7701_WriteData(0x00);
-  ST7701_WriteData(0x11);
+  st7701_write_command(0xFF);
+  st7701_write_data(0x77);
+  st7701_write_data(0x01);
+  st7701_write_data(0x00);
+  st7701_write_data(0x00);
+  st7701_write_data(0x11);
 
-  ST7701_WriteCommand(0xB0);  // VOP  3.5375+ *x 0.0125
-  ST7701_WriteData(0x6d);     // 5D
+  st7701_write_command(0xB0);  // VOP  3.5375+ *x 0.0125
+  st7701_write_data(0x6d);     // 5D
   
-  ST7701_WriteCommand(0xB1); 	// VCOM amplitude setting  
-  ST7701_WriteData(0x37);
+  st7701_write_command(0xB1);   // VCOM amplitude setting  
+  st7701_write_data(0x37);
   
-  ST7701_WriteCommand(0xB2); 	// VGH Voltage setting  
-  ST7701_WriteData(0x81);	    // 12V
+  st7701_write_command(0xB2);   // VGH Voltage setting  
+  st7701_write_data(0x81);      // 12V
 
-  ST7701_WriteCommand(0xB3);
-  ST7701_WriteData(0x80);
+  st7701_write_command(0xB3);
+  st7701_write_data(0x80);
 
-  ST7701_WriteCommand(0xB5); 	// VGL Voltage setting  
-  ST7701_WriteData(0x43);	    //-8.3V
+  st7701_write_command(0xB5);   // VGL Voltage setting  
+  st7701_write_data(0x43);      //-8.3V
 
-  ST7701_WriteCommand(0xB7);
-  ST7701_WriteData(0x85);
+  st7701_write_command(0xB7);
+  st7701_write_data(0x85);
 
-  ST7701_WriteCommand(0xB8);
-  ST7701_WriteData(0x20);
+  st7701_write_command(0xB8);
+  st7701_write_data(0x20);
 
-  ST7701_WriteCommand(0xC1);
-  ST7701_WriteData(0x78);
+  st7701_write_command(0xC1);
+  st7701_write_data(0x78);
 
-  ST7701_WriteCommand(0xC2);
-  ST7701_WriteData(0x78);
+  st7701_write_command(0xC2);
+  st7701_write_data(0x78);
 
-  ST7701_WriteCommand(0xD0);
-  ST7701_WriteData(0x88);
+  st7701_write_command(0xD0);
+  st7701_write_data(0x88);
 
-  ST7701_WriteCommand(0xE0);
-  ST7701_WriteData(0x00);
-  ST7701_WriteData(0x00);
-  ST7701_WriteData(0x02);
+  st7701_write_command(0xE0);
+  st7701_write_data(0x00);
+  st7701_write_data(0x00);
+  st7701_write_data(0x02);
 
-  ST7701_WriteCommand(0xE1);
-  ST7701_WriteData(0x03);	
-  ST7701_WriteData(0xA0);
-  ST7701_WriteData(0x00);	
-  ST7701_WriteData(0x00);
-  ST7701_WriteData(0x04);	
-  ST7701_WriteData(0xA0);
-  ST7701_WriteData(0x00);	
-  ST7701_WriteData(0x00);	
-  ST7701_WriteData(0x00);
-  ST7701_WriteData(0x20);
-  ST7701_WriteData(0x20);
+  st7701_write_command(0xE1);
+  st7701_write_data(0x03);  
+  st7701_write_data(0xA0);
+  st7701_write_data(0x00);  
+  st7701_write_data(0x00);
+  st7701_write_data(0x04);  
+  st7701_write_data(0xA0);
+  st7701_write_data(0x00);  
+  st7701_write_data(0x00);  
+  st7701_write_data(0x00);
+  st7701_write_data(0x20);
+  st7701_write_data(0x20);
 
-  ST7701_WriteCommand(0xE2);
-  ST7701_WriteData(0x00);	
-  ST7701_WriteData(0x00);	  
-  ST7701_WriteData(0x00);	
-  ST7701_WriteData(0x00);	
-  ST7701_WriteData(0x00);	
-  ST7701_WriteData(0x00);	
-  ST7701_WriteData(0x00);	
-  ST7701_WriteData(0x00);	
-  ST7701_WriteData(0x00);	
-  ST7701_WriteData(0x00);	
-  ST7701_WriteData(0x00);	
-  ST7701_WriteData(0x00);	
-  ST7701_WriteData(0x00);
+  st7701_write_command(0xE2);
+  st7701_write_data(0x00);  
+  st7701_write_data(0x00);    
+  st7701_write_data(0x00);  
+  st7701_write_data(0x00);  
+  st7701_write_data(0x00);  
+  st7701_write_data(0x00);  
+  st7701_write_data(0x00);  
+  st7701_write_data(0x00);  
+  st7701_write_data(0x00);  
+  st7701_write_data(0x00);  
+  st7701_write_data(0x00);  
+  st7701_write_data(0x00);  
+  st7701_write_data(0x00);
 
-  ST7701_WriteCommand(0xE3);
-  ST7701_WriteData(0x00);
-  ST7701_WriteData(0x00);
-  ST7701_WriteData(0x11);
-  ST7701_WriteData(0x00);
+  st7701_write_command(0xE3);
+  st7701_write_data(0x00);
+  st7701_write_data(0x00);
+  st7701_write_data(0x11);
+  st7701_write_data(0x00);
 
-  ST7701_WriteCommand(0xE4);
-  ST7701_WriteData(0x22);
-  ST7701_WriteData(0x00);
+  st7701_write_command(0xE4);
+  st7701_write_data(0x22);
+  st7701_write_data(0x00);
 
-  ST7701_WriteCommand(0xE5);		
-  ST7701_WriteData(0x05);	
-  ST7701_WriteData(0xEC);	
-  ST7701_WriteData(0xA0);
-  ST7701_WriteData(0xA0);
-  ST7701_WriteData(0x07);	
-  ST7701_WriteData(0xEE);	
-  ST7701_WriteData(0xA0);
-  ST7701_WriteData(0xA0);
-  ST7701_WriteData(0x00);
-  ST7701_WriteData(0x00);	
-  ST7701_WriteData(0x00);
-  ST7701_WriteData(0x00);
-  ST7701_WriteData(0x00);
-  ST7701_WriteData(0x00);	
-  ST7701_WriteData(0x00);
-  ST7701_WriteData(0x00);
+  st7701_write_command(0xE5);    
+  st7701_write_data(0x05);  
+  st7701_write_data(0xEC);  
+  st7701_write_data(0xA0);
+  st7701_write_data(0xA0);
+  st7701_write_data(0x07);  
+  st7701_write_data(0xEE);  
+  st7701_write_data(0xA0);
+  st7701_write_data(0xA0);
+  st7701_write_data(0x00);
+  st7701_write_data(0x00);  
+  st7701_write_data(0x00);
+  st7701_write_data(0x00);
+  st7701_write_data(0x00);
+  st7701_write_data(0x00);  
+  st7701_write_data(0x00);
+  st7701_write_data(0x00);
 
-  ST7701_WriteCommand(0xE6);
-  ST7701_WriteData(0x00);
-  ST7701_WriteData(0x00);
-  ST7701_WriteData(0x11);
-  ST7701_WriteData(0x00);
+  st7701_write_command(0xE6);
+  st7701_write_data(0x00);
+  st7701_write_data(0x00);
+  st7701_write_data(0x11);
+  st7701_write_data(0x00);
 
-  ST7701_WriteCommand(0xE7);
-  ST7701_WriteData(0x22);
-  ST7701_WriteData(0x00);
+  st7701_write_command(0xE7);
+  st7701_write_data(0x22);
+  st7701_write_data(0x00);
 
-  ST7701_WriteCommand(0xE8);		
-  ST7701_WriteData(0x06);	
-  ST7701_WriteData(0xED);	
-  ST7701_WriteData(0xA0);
-  ST7701_WriteData(0xA0);
-  ST7701_WriteData(0x08);	
-  ST7701_WriteData(0xEF);	
-  ST7701_WriteData(0xA0); 
-  ST7701_WriteData(0xA0);
-  ST7701_WriteData(0x00);	
-  ST7701_WriteData(0x00);	
-  ST7701_WriteData(0x00);
-  ST7701_WriteData(0x00);
-  ST7701_WriteData(0x00);	
-  ST7701_WriteData(0x00);	
-  ST7701_WriteData(0x00);
-  ST7701_WriteData(0x00);
+  st7701_write_command(0xE8);    
+  st7701_write_data(0x06);  
+  st7701_write_data(0xED);  
+  st7701_write_data(0xA0);
+  st7701_write_data(0xA0);
+  st7701_write_data(0x08);  
+  st7701_write_data(0xEF);  
+  st7701_write_data(0xA0); 
+  st7701_write_data(0xA0);
+  st7701_write_data(0x00);  
+  st7701_write_data(0x00);  
+  st7701_write_data(0x00);
+  st7701_write_data(0x00);
+  st7701_write_data(0x00);  
+  st7701_write_data(0x00);  
+  st7701_write_data(0x00);
+  st7701_write_data(0x00);
 
-  ST7701_WriteCommand(0xEB);
-  ST7701_WriteData(0x00); 	
-  ST7701_WriteData(0x00);
-  ST7701_WriteData(0x40);
-  ST7701_WriteData(0x40);
-  ST7701_WriteData(0x00);
-  ST7701_WriteData(0x00);
-  ST7701_WriteData(0x00);  
+  st7701_write_command(0xEB);
+  st7701_write_data(0x00);   
+  st7701_write_data(0x00);
+  st7701_write_data(0x40);
+  st7701_write_data(0x40);
+  st7701_write_data(0x00);
+  st7701_write_data(0x00);
+  st7701_write_data(0x00);  
 
-  ST7701_WriteCommand(0xED);  
-  ST7701_WriteData(0xFF); 
-  ST7701_WriteData(0xFF);  
-  ST7701_WriteData(0xFF); 	
-  ST7701_WriteData(0xBA); 		
-  ST7701_WriteData(0x0A); 	
-  ST7701_WriteData(0xBF); 	
-  ST7701_WriteData(0x45); 	
-  ST7701_WriteData(0xFF); 
-  ST7701_WriteData(0xFF);  
-  ST7701_WriteData(0x54); 	
-  ST7701_WriteData(0xFB); 	
-  ST7701_WriteData(0xA0); 	
-  ST7701_WriteData(0xAB); 	
-  ST7701_WriteData(0xFF); 
-  ST7701_WriteData(0xFF); 
-  ST7701_WriteData(0xFF); 
+  st7701_write_command(0xED);  
+  st7701_write_data(0xFF); 
+  st7701_write_data(0xFF);  
+  st7701_write_data(0xFF);   
+  st7701_write_data(0xBA);     
+  st7701_write_data(0x0A);   
+  st7701_write_data(0xBF);   
+  st7701_write_data(0x45);   
+  st7701_write_data(0xFF); 
+  st7701_write_data(0xFF);  
+  st7701_write_data(0x54);   
+  st7701_write_data(0xFB);   
+  st7701_write_data(0xA0);   
+  st7701_write_data(0xAB);   
+  st7701_write_data(0xFF); 
+  st7701_write_data(0xFF); 
+  st7701_write_data(0xFF); 
 
-  ST7701_WriteCommand(0xEF);
-  ST7701_WriteData(0x10); 
-  ST7701_WriteData(0x0D); 
-  ST7701_WriteData(0x04); 
-  ST7701_WriteData(0x08); 
-  ST7701_WriteData(0x3F); 
-  ST7701_WriteData(0x1F);
+  st7701_write_command(0xEF);
+  st7701_write_data(0x10); 
+  st7701_write_data(0x0D); 
+  st7701_write_data(0x04); 
+  st7701_write_data(0x08); 
+  st7701_write_data(0x3F); 
+  st7701_write_data(0x1F);
 
-  ST7701_WriteCommand(0xFF);
-  ST7701_WriteData(0x77);
-  ST7701_WriteData(0x01);
-  ST7701_WriteData(0x00);
-  ST7701_WriteData(0x00);
-  ST7701_WriteData(0x13);
+  st7701_write_command(0xFF);
+  st7701_write_data(0x77);
+  st7701_write_data(0x01);
+  st7701_write_data(0x00);
+  st7701_write_data(0x00);
+  st7701_write_data(0x13);
 
-  ST7701_WriteCommand(0xEF);
-  ST7701_WriteData(0x08);
+  st7701_write_command(0xEF);
+  st7701_write_data(0x08);
 
-  ST7701_WriteCommand(0xFF);
-  ST7701_WriteData(0x77);
-  ST7701_WriteData(0x01);
-  ST7701_WriteData(0x00);
-  ST7701_WriteData(0x00);
-  ST7701_WriteData(0x00);
+  st7701_write_command(0xFF);
+  st7701_write_data(0x77);
+  st7701_write_data(0x01);
+  st7701_write_data(0x00);
+  st7701_write_data(0x00);
+  st7701_write_data(0x00);
 
 
-  ST7701_WriteCommand(0x36);
-  ST7701_WriteData(0x00);
+  st7701_write_command(0x36);
+  st7701_write_data(0x00);
 
-  ST7701_WriteCommand(0x3A);
-  ST7701_WriteData(0x66);
+  st7701_write_command(0x3A);
+  st7701_write_data(0x66);
 
-  ST7701_WriteCommand(0x11);
+  st7701_write_command(0x11);
   
   vTaskDelay(pdMS_TO_TICKS(480));
 
-  ST7701_WriteCommand(0x20); //
+  st7701_write_command(0x20); //
   vTaskDelay(pdMS_TO_TICKS(120));
-  ST7701_WriteCommand(0x29); 
-  ST7701_CS_Dis();
+  st7701_write_command(0x29); 
+  st7701_cs_dis();
+  vTaskDelay(pdMS_TO_TICKS(480));
+
+  st7701_write_command(0x20); //
+  vTaskDelay(pdMS_TO_TICKS(120));
+  st7701_write_command(0x29); 
+  st7701_cs_dis();
 
   //  RGB
   esp_lcd_rgb_panel_config_t rgb_config = {
@@ -385,13 +386,13 @@ void ST7701_Init() {
   esp_lcd_panel_init(panel_handle);
 }
 
-void LCD_Init() {
-  ST7701_Reset();
-  ST7701_Init();
-  Backlight_Init();
+void lcd_init() {
+  st7701_reset();
+  st7701_init();
+  backlight_init();
 }
 
-void LCD_addWindow(uint16_t Xstart, uint16_t Xend, uint16_t Ystart, uint16_t Yend, uint8_t *color) {
+void lcd_add_window(uint16_t Xstart, uint16_t Xend, uint16_t Ystart, uint16_t Yend, uint8_t *color) {
   Xend = Xend + 1;
   Yend = Yend + 1;
   if (Xend >= ESP_PANEL_LCD_WIDTH)
@@ -402,17 +403,16 @@ void LCD_addWindow(uint16_t Xstart, uint16_t Xend, uint16_t Ystart, uint16_t Yen
   esp_lcd_panel_draw_bitmap(panel_handle, Xstart, Ystart, Xend, Yend, color);
 }
 
-void Backlight_Init() {
+void backlight_init() {
   ledcAttach(LCD_BACKLIGHT_PIN, frequency, resolution);  
 }
 
-void Set_Backlight(uint8_t light) {
-  if (light > backlight_max || light < 0) {
-    return;
+void set_backlight(uint8_t light) {
+  if (light > backlight_max) {
+    light = backlight_max;
   }
 
   uint32_t backlight = (light * 255) / backlight_max;
-  //printf("backlight %d\n", backlight);
   ledcWrite(LCD_BACKLIGHT_PIN, backlight);
 }
 

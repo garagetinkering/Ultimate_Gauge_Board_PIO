@@ -7,8 +7,8 @@
 #define I2C_OK            true
 #define I2C_FAIL          false
 
-bool I2C_ScanAddress(uint8_t address);
-void I2C_Init(void);
+bool i2c_scan_address(uint8_t address);
+void i2c_init(void);
 
-bool I2C_Read(uint8_t driver_addr, uint8_t reg_addr, uint8_t *reg_data, uint32_t length);
-bool I2C_Write(uint8_t driver_addr, uint8_t reg_addr, const uint8_t *reg_data, uint32_t length);
+bool i2c_read(uint8_t driver_addr, uint8_t reg_addr, uint8_t *reg_data, uint32_t length);
+bool i2c_write(uint8_t driver_addr, uint8_t reg_addr, const uint8_t *reg_data, uint32_t length);

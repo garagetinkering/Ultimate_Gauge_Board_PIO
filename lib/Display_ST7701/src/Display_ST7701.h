@@ -84,11 +84,11 @@
 
 extern uint8_t LCD_Backlight;
 extern esp_lcd_panel_handle_t panel_handle;
-void ST7701_Init();
+void st7701_init();
 
-void LCD_Init();
-void LCD_addWindow(uint16_t Xstart, uint16_t Xend, uint16_t Ystart, uint16_t Yend, uint8_t *color);
+void lcd_init();
+void lcd_add_window(uint16_t Xstart, uint16_t Xend, uint16_t Ystart, uint16_t Yend, uint8_t *color);
 
 // backlight
-void Backlight_Init();
-void Set_Backlight(uint8_t light);  
+void backlight_init();
+void set_backlight(uint8_t light);  

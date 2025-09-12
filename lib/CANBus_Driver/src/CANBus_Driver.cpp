@@ -2,7 +2,7 @@
 #include "CANBus_Driver.h"
 #include <stdio.h>
 
-void CANBus_Init(void) {
+void canbus_init(void) {
 
   // Configure TWAI (CAN)
     twai_general_config_t g_config = TWAI_GENERAL_CONFIG_DEFAULT(CAN_TX_GPIO, CAN_RX_GPIO, TWAI_MODE_NORMAL);

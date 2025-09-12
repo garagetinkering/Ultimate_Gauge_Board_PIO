@@ -6,4 +6,4 @@
 
 #define CANBUS_SPEED    500000   // 500kbps
 
-void CANBus_Init();
+void canbus_init();
